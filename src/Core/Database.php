@@ -1,36 +1,100 @@
 <?php
 
-declare(strict_types=1);
-
-namespace App\Config;
+namespace App\Core;
 
 use PDO;
 use PDOException;
+use PDOStatement;
 
 class Database
 {
-    private static ?PDO $connection = null;
+    /**
+     * Instancia única de la clase (patrón singleton).
+     * null mientras no se haya creado todavía.
+     */
+    private static ?Database $sharedInstance = null;
 
-    public static function getConnection(): PDO
+    /**
+     * Conexión PDO reutilizable.
+     */
+    private PDO $connection;
+
+    /**
+     * Constructor privado: nadie puede hacer "new Database()" desde fuera.
+     * Solo se instancia una vez, desde getSharedInstance().
+     */
+    private function __construct()
     {
-        if (self::$connection === null) {
-            $host     = 'db';
-            $dbName   = 'practica';
-            $user     = 'dev';
-            $password = 'dev';
+        $configuration = require __DIR__ . '/../../config.php';
+        $databaseConfig = $configuration['db'];
 
-            $dsn = "mysql:host={$host};dbname={$dbName};charset=utf8mb4";
+        $dataSourceName = sprintf(
+            'mysql:host=%s;dbname=%s;charset=%s',
+            $databaseConfig['host'],
+            $databaseConfig['dbname'],
+            $databaseConfig['charset']
+        );
 
-            try {
-                self::$connection = new PDO($dsn, $user, $password, [
+        try {
+            $this->connection = new PDO(
+                $dataSourceName,
+                $databaseConfig['user'],
+                $databaseConfig['pass'],
+                [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                ]);
-            } catch (PDOException $e) {
-                die('Error de conexión a la base de datos: ' . $e->getMessage());
-            }
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                ]
+            );
+        } catch (PDOException $connectionError) {
+            die('Error de conexión a la base de datos: ' . $connectionError->getMessage());
+        }
+    }
+
+    /**
+     * Devuelve la única instancia de Database de toda la petición.
+     * La crea la primera vez; las siguientes, la reutiliza.
+     */
+    public static function getSharedInstance(): Database
+    {
+        if (self::$sharedInstance === null) {
+            self::$sharedInstance = new self();
         }
 
-        return self::$connection;
+        return self::$sharedInstance;
+    }
+
+    /**
+     * Prepara y ejecuta una consulta SQL con parámetros vinculados.
+     * Devuelve el PDOStatement ya ejecutado.
+     */
+    public static function query(string $sql, array $parameters = []): PDOStatement
+    {
+        $statement = self::getSharedInstance()->connection->prepare($sql);
+        $statement->execute($parameters);
+
+        return $statement;
+    }
+
+    /**
+     * Ejecuta una consulta y devuelve todos los registros.
+     * Devuelve null si no hay resultados.
+     */
+    public static function fetchAll(string $sql, array $parameters = []): ?array
+    {
+        $rows = self::query($sql, $parameters)->fetchAll();
+
+        return $rows === [] ? null : $rows;
+    }
+
+    /**
+     * Ejecuta una consulta y devuelve el primer registro.
+     * Devuelve null si no hay resultados.
+     */
+    public static function fetchOne(string $sql, array $parameters = []): ?array
+    {
+        $row = self::query($sql, $parameters)->fetch();
+
+        return $row === false ? null : $row;
     }
 }
