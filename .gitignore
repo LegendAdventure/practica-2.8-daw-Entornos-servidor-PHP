@@ -1,0 +1,21 @@
+# Dependencias de Composer (se regeneran con "composer install")
+/vendor
+
+# Archivos de configuración con credenciales.
+# En esta práctica se pueden versionar; descomenta las dos líneas
+# siguientes si prefieres la buena práctica de no subirlos.
+# .env
+# config.php
+
+# Archivos del sistema / editores
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs
+*.log
+
+# IDEs
+.idea/
+.vscode/
