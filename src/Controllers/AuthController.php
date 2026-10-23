@@ -4,129 +4,99 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Models\Article;
+use App\Models\User;
 
-class ArticleController
+class AuthController
 {
-    // Mostrar todos los artículos
-    public function index(): void
+    // Mostrar el formulario de registro
+    public function showRegisterForm(): void
     {
-        $articles = Article::all();
-        // Carga la vista /Views/articles/index.php, encargada de mostrar el array $articles
-        require __DIR__ . '/../Views/articles/index.php';
+        require __DIR__ . '/../Views/auth/register.php';
     }
 
-    // Mostrar un artículo por $id
-    public function show(): void
+    // Procesar el registro
+    public function register(): void
     {
-        $id = (int) ($_GET['id'] ?? 0);
-        $article = Article::find($id);
+        $email    = trim($_POST['email'] ?? '');
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
 
-        if ($article === null) {
-            http_response_code(404);
-            echo 'Artículo no encontrado.';
-            return;
-        }
-        // Carga la vista para mostrar artículos (show.php)
-        require __DIR__ . '/../Views/articles/show.php';
-    }
-
-    // Formulario para crear un artículo
-    public function create(): void
-    {
-        // Carga la vista con el formulario de crear artículos
-        require __DIR__ . '/../Views/articles/create.php';
-    }
-
-    // Almacenar el artículo que viene del formulario de create()
-    public function store(): void
-    {
-        $this->checkCsrfToken();
-
-        $title = trim($_POST['title'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $price = (float) ($_POST['price'] ?? 0);
-        $stock = (int) ($_POST['stock'] ?? 0);
-
-        if ($title === '') {
-            $_SESSION['error'] = 'El título es obligatorio.';
-            // Redirige al endpoint '/articles/create'
-            header('Location: /articles/create');
+        if ($email === '' || $username === '' || $password === '') {
+            $_SESSION['error'] = 'Todos los campos son obligatorios.';
+            header('Location: /register');
             exit;
         }
 
-        Article::create($title, $description, $price, $stock);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['error'] = 'El email no es válido.';
+            header('Location: /register');
+            exit;
+        }
 
-        $_SESSION['success'] = 'Artículo creado correctamente.';
-        // Redirige al endpoint '/articles'
-        header('Location: /articles');
+        $userModel = new User();
+
+        // Comprobar que no existe ya un usuario con ese email
+        $existing = \App\Core\Database::fetchOne(
+            'SELECT id FROM users WHERE email = :email',
+            ['email' => $email]
+        );
+
+        if ($existing !== null) {
+            $_SESSION['error'] = 'Ya existe un usuario con ese email.';
+            header('Location: /register');
+            exit;
+        }
+
+        $userModel->insert([
+            'email'    => $email,
+            'username' => $username,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+        ]);
+
+        $_SESSION['success'] = 'Registro correcto. Ya puedes iniciar sesión.';
+        header('Location: /login');
         exit;
     }
 
-    // Formulario para modificar un artículo
-    public function edit(): void
+    // Mostrar el formulario de login
+    public function showLoginForm(): void
     {
-        $id = (int) ($_GET['id'] ?? 0);
-        $article = Article::find($id);
-
-        if ($article === null) {
-            http_response_code(404);
-            echo 'Artículo no encontrado.';
-            return;
-        }
-
-        // Carga la vista con el formulario de editar artículos
-        require __DIR__ . '/../Views/articles/edit.php';
+        require __DIR__ . '/../Views/auth/login.php';
     }
 
-    // Almacenar el artículo que viene del formulario de edit()
-    public function update(): void
+    // Procesar el login
+    public function login(): void
     {
-        $this->checkCsrfToken();
+        $email    = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
 
-        $id = (int) ($_POST['id'] ?? 0);
-        $article = Article::find($id);
-
-        if ($article === null) {
-            http_response_code(404);
-            echo 'Artículo no encontrado.';
-            return;
+        if ($email === '' || $password === '') {
+            $_SESSION['error'] = 'Email y contraseña son obligatorios.';
+            header('Location: /login');
+            exit;
         }
 
-        $article->title = trim($_POST['title'] ?? '');
-        $article->description = trim($_POST['description'] ?? '');
-        $article->price = (float) ($_POST['price'] ?? 0);
-        $article->stock = (int) ($_POST['stock'] ?? 0);
+        $userModel = new User();
+        $userId = $userModel->findByEmail($email, $password);
 
-        $article->update();
+        if ($userId === null) {
+            $_SESSION['error'] = 'Credenciales incorrectas.';
+            header('Location: /login');
+            exit;
+        }
 
-        $_SESSION['success'] = 'Artículo actualizado correctamente.';
-        header('Location: /articles');
+        $_SESSION['user_id'] = $userId;
+        $_SESSION['email']   = $email;
+
+        header('Location: /');
         exit;
     }
 
-    // Borrar un artículo
-    public function delete(): void
+    // Cerrar sesión
+    public function logout(): void
     {
-        $this->checkCsrfToken();
-
-        $id = (int) ($_POST['id'] ?? 0);
-        Article::delete($id);
-
-        $_SESSION['success'] = 'Artículo eliminado.';
-        header('Location: /articles');
+        session_destroy();
+        header('Location: /');
         exit;
-    }
-
-    // Comprobar el token CSRF. Se usa como método private auxiliar para no 
-    // escribirlo varias veces a lo largo del controlador.
-    private function checkCsrfToken(): void
-    {
-        $token = $_POST['csrf_token'] ?? '';
-
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
-            http_response_code(419);
-            die('Token CSRF inválido. Recarga la página e inténtalo de nuevo.');
-        }
     }
 }
