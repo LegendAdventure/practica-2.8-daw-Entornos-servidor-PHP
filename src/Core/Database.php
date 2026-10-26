@@ -8,21 +8,10 @@ use PDOStatement;
 
 class Database
 {
-    /**
-     * Instancia única de la clase (patrón singleton).
-     * null mientras no se haya creado todavía.
-     */
     private static ?Database $sharedInstance = null;
 
-    /**
-     * Conexión PDO reutilizable.
-     */
     private PDO $connection;
 
-    /**
-     * Constructor privado: nadie puede hacer "new Database()" desde fuera.
-     * Solo se instancia una vez, desde getSharedInstance().
-     */
     private function __construct()
     {
         $configuration = require __DIR__ . '/../../config.php';
@@ -51,10 +40,6 @@ class Database
         }
     }
 
-    /**
-     * Devuelve la única instancia de Database de toda la petición.
-     * La crea la primera vez; las siguientes, la reutiliza.
-     */
     public static function getSharedInstance(): Database
     {
         if (self::$sharedInstance === null) {
@@ -64,10 +49,6 @@ class Database
         return self::$sharedInstance;
     }
 
-    /**
-     * Prepara y ejecuta una consulta SQL con parámetros vinculados.
-     * Devuelve el PDOStatement ya ejecutado.
-     */
     public static function query(string $sql, array $parameters = []): PDOStatement
     {
         $statement = self::getSharedInstance()->connection->prepare($sql);
@@ -76,10 +57,6 @@ class Database
         return $statement;
     }
 
-    /**
-     * Ejecuta una consulta y devuelve todos los registros.
-     * Devuelve null si no hay resultados.
-     */
     public static function fetchAll(string $sql, array $parameters = []): ?array
     {
         $rows = self::query($sql, $parameters)->fetchAll();
@@ -87,14 +64,15 @@ class Database
         return $rows === [] ? null : $rows;
     }
 
-    /**
-     * Ejecuta una consulta y devuelve el primer registro.
-     * Devuelve null si no hay resultados.
-     */
     public static function fetchOne(string $sql, array $parameters = []): ?array
     {
         $row = self::query($sql, $parameters)->fetch();
 
         return $row === false ? null : $row;
+    }
+
+    public static function lastInsertId(): int
+    {
+        return (int) self::getSharedInstance()->connection->lastInsertId();
     }
 }

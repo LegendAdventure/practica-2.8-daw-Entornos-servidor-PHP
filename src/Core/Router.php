@@ -25,7 +25,8 @@ class Router
     // que hay que invocar para una ruta ($path) y un método ('GET' o 'POST') determinados
     public function dispatch(string $method, string $path): void
     {
-        $action = $this->routes[$method][$path] ?? null;
+        $action = $this->routes[$method][$path] ?? null; // ?? Devuelve lo de la izquieda (routes) o lo de la derecha (null)
+  
 
         if ($action === null) {
             http_response_code(404);
