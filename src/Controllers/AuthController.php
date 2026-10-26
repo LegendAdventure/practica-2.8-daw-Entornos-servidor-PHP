@@ -8,6 +8,16 @@ use App\Models\User;
 
 class AuthController
 {
+    private function checkCsrfToken(): void
+    {
+        $token = $_POST['csrf_token'] ?? '';
+
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            http_response_code(403);
+            die('Token CSRF inválido. Recarga la página e inténtalo de nuevo.');
+        }
+    }
+
     // Mostrar el formulario de registro
     public function showRegisterForm(): void
     {
@@ -17,6 +27,8 @@ class AuthController
     // Procesar el registro
     public function register(): void
     {
+        $this->checkCsrfToken();
+
         $email    = trim($_POST['email'] ?? '');
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -67,6 +79,8 @@ class AuthController
     // Procesar el login
     public function login(): void
     {
+        $this->checkCsrfToken();
+
         $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 

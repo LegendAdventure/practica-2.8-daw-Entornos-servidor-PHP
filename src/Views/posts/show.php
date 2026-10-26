@@ -21,6 +21,7 @@ require __DIR__ . '/../layout.php';
         <a href="/posts/edit?id=<?= (int) $post['id'] ?>">Editar</a>
         |
         <form method="post" action="/posts/delete" style="display: inline;">
+            <?= csrf_field() ?>
             <input type="hidden" name="id" value="<?= (int) $post['id'] ?>">
             <button type="submit" onclick="return confirm('¿Seguro que quieres borrar esta publicación?')">Borrar</button>
         </form>
@@ -50,6 +51,7 @@ require __DIR__ . '/../layout.php';
 <?php if (!empty($_SESSION['user_id'])): ?>
     <h4>Añadir comentario</h4>
     <form method="post" action="/comments/store">
+        <?= csrf_field() ?>
         <input type="hidden" name="post_id" value="<?= (int) $post['id'] ?>">
         <textarea name="body" rows="4" required></textarea>
         <button type="submit">Comentar</button>

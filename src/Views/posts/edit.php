@@ -6,6 +6,7 @@ require __DIR__ . '/../layout.php';
 <h2>Editar publicación</h2>
 
 <form method="post" action="/posts/update">
+    <?= csrf_field() ?>
     <input type="hidden" name="id" value="<?= (int) $post['id'] ?>">
 
     <label for="title">Título</label>

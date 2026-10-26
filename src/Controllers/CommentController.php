@@ -9,8 +9,19 @@ use App\Models\Comment;
 
 class CommentController
 {
+    private function checkCsrfToken(): void
+    {
+        $token = $_POST['csrf_token'] ?? '';
+
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            http_response_code(403);
+            die('Token CSRF inválido. Recarga la página e inténtalo de nuevo.');
+        }
+    }
     public function store(): void
     {
+        $this->checkCsrfToken();
+
         if (empty($_SESSION['user_id'])) {
             $_SESSION['error'] = 'Debes iniciar sesión para comentar.';
             header('Location: /login');
@@ -26,7 +37,6 @@ class CommentController
             exit;
         }
 
-        // Comprobar que el post existe
         $post = Database::fetchOne(
             'SELECT id FROM posts WHERE id = :id',
             ['id' => $postId]

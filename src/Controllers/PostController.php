@@ -4,16 +4,25 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Models\Post;
 use App\Core\Database;
+use App\Models\Post;
 
 class PostController
 {
+    private function checkCsrfToken(): void
+    {
+        $token = $_POST['csrf_token'] ?? '';
+
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            http_response_code(403);
+            die('Token CSRF inválido. Recarga la página e inténtalo de nuevo.');
+        }
+    }
+
     // ---------------------------------------------------------------
     // Lectura (público)
     // ---------------------------------------------------------------
 
-    // Listado de posts, con búsqueda opcional por título o categoría
     public function index(): void
     {
         $postModel = new Post();
@@ -28,7 +37,6 @@ class PostController
         require __DIR__ . '/../Views/posts/index.php';
     }
 
-    // Detalle de un post (con sus comentarios)
     public function show(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
@@ -42,7 +50,6 @@ class PostController
             return;
         }
 
-        // Comentarios del post, con el email del autor de cada uno
         $comments = Database::fetchAll(
             'SELECT comments.*, users.email AS author_email
              FROM comments
@@ -54,6 +61,7 @@ class PostController
 
         require __DIR__ . '/../Views/posts/show.php';
     }
+
     // ---------------------------------------------------------------
     // Crear (solo logueados)
     // ---------------------------------------------------------------
@@ -71,6 +79,8 @@ class PostController
 
     public function store(): void
     {
+        $this->checkCsrfToken();
+
         if (empty($_SESSION['user_id'])) {
             $_SESSION['error'] = 'Debes iniciar sesión para publicar.';
             header('Location: /login');
@@ -134,6 +144,8 @@ class PostController
 
     public function update(): void
     {
+        $this->checkCsrfToken();
+
         if (empty($_SESSION['user_id'])) {
             $_SESSION['error'] = 'Debes iniciar sesión.';
             header('Location: /login');
@@ -184,6 +196,8 @@ class PostController
 
     public function destroy(): void
     {
+        $this->checkCsrfToken();
+
         if (empty($_SESSION['user_id'])) {
             $_SESSION['error'] = 'Debes iniciar sesión.';
             header('Location: /login');

@@ -1,11 +1,10 @@
-<?php
-/** @var void */
-require __DIR__ . '/../layout.php';
-?>
+<?php require __DIR__ . '/../layout.php'; ?>
 
 <h2>Nueva publicación</h2>
 
 <form method="post" action="/posts/store">
+    <?= csrf_field() ?>
+
     <label for="title">Título</label>
     <input type="text" name="title" id="title" required>
 

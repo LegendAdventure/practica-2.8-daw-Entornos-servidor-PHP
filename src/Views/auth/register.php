@@ -3,6 +3,8 @@
 <h2>Crear cuenta</h2>
 
 <form method="post" action="/register">
+    <?= csrf_field() ?>
+
     <label for="email">Email</label>
     <input type="email" name="email" id="email" required>
 

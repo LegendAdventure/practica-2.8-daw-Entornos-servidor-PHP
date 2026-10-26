@@ -15,6 +15,16 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+/**
+ * Devuelve el campo oculto con el token CSRF para incluir en los formularios POST.
+ * Uso en vistas: <?= csrf_field() ?>
+ */
+function csrf_field(): string
+{
+    $token = $_SESSION['csrf_token'] ?? '';
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token) . '">';
+}
+
 $router = new Router();
 
 // --- Autenticación ---
