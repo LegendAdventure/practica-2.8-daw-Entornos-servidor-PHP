@@ -18,6 +18,7 @@ class CommentController
             die('Token CSRF inválido. Recarga la página e inténtalo de nuevo.');
         }
     }
+
     public function store(): void
     {
         $this->checkCsrfToken();
@@ -50,7 +51,7 @@ class CommentController
 
         if ($body === '') {
             $_SESSION['error'] = 'El comentario no puede estar vacío.';
-            header('Location: /posts/show?id=' . $postId);
+            header('Location: /posts/show/' . $postId);
             exit;
         }
 
@@ -62,7 +63,7 @@ class CommentController
         ]);
 
         $_SESSION['success'] = 'Comentario añadido.';
-        header('Location: /posts/show?id=' . $postId);
+        header('Location: /posts/show/' . $postId);
         exit;
     }
 }

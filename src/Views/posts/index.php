@@ -22,7 +22,7 @@ require __DIR__ . '/../layout.php';
         <?php foreach ($posts as $post): ?>
             <li style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
                 <h3 style="margin-top: 0;">
-                    <a href="/posts/show?id=<?= (int) $post['id'] ?>">
+                    <a href="/posts/show/<?= (int) $post['id'] ?>">
                         <?= htmlspecialchars($post['title']) ?>
                     </a>
                 </h3>

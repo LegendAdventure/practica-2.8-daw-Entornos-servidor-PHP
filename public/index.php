@@ -52,4 +52,7 @@ $router->get('/', [PostController::class, 'index']);
 $path   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Traducir URLs con id (/posts/show/3) a la ruta base (/posts/show)
+$path = $router->resolve($path);
+
 $router->dispatch($method, $path);

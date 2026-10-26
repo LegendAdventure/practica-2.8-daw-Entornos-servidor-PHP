@@ -18,11 +18,10 @@ require __DIR__ . '/../layout.php';
 
 <?php if (!empty($_SESSION['user_id']) && (int) $_SESSION['user_id'] === (int) $post['user_id']): ?>
     <p style="margin-top: 1rem;">
-        <a href="/posts/edit?id=<?= (int) $post['id'] ?>">Editar</a>
+        <a href="/posts/edit/<?= (int) $post['id'] ?>">Editar</a>
         |
-        <form method="post" action="/posts/delete" style="display: inline;">
+        <form method="post" action="/posts/delete/<?= (int) $post['id'] ?>" style="display: inline;">
             <?= csrf_field() ?>
-            <input type="hidden" name="id" value="<?= (int) $post['id'] ?>">
             <button type="submit" onclick="return confirm('¿Seguro que quieres borrar esta publicación?')">Borrar</button>
         </form>
     </p>

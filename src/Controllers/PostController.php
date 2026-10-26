@@ -175,7 +175,7 @@ class PostController
 
         if ($title === '' || $body === '' || $category === '') {
             $_SESSION['error'] = 'Todos los campos son obligatorios.';
-            header('Location: /posts/edit?id=' . $id);
+            header('Location: /posts/edit/' . $id);
             exit;
         }
 
@@ -186,7 +186,7 @@ class PostController
         ]);
 
         $_SESSION['success'] = 'Publicación actualizada.';
-        header('Location: /posts/show?id=' . $id);
+        header('Location: /posts/show/' . $id);
         exit;
     }
 

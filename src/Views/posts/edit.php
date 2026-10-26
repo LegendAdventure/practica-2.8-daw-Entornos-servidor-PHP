@@ -5,9 +5,8 @@ require __DIR__ . '/../layout.php';
 
 <h2>Editar publicación</h2>
 
-<form method="post" action="/posts/update">
+<form method="post" action="/posts/update/<?= (int) $post['id'] ?>">
     <?= csrf_field() ?>
-    <input type="hidden" name="id" value="<?= (int) $post['id'] ?>">
 
     <label for="title">Título</label>
     <input type="text" name="title" id="title"
@@ -23,6 +22,6 @@ require __DIR__ . '/../layout.php';
     <button type="submit">Guardar cambios</button>
 </form>
 
-<p><a href="/posts/show?id=<?= (int) $post['id'] ?>">← Volver al detalle</a></p>
+<p><a href="/posts/show/<?= (int) $post['id'] ?>">← Volver al detalle</a></p>
 
 <?php require __DIR__ . '/../footer.php'; ?>
