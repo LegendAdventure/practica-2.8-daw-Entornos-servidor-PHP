@@ -6,6 +6,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Router;
 use App\Controllers\AuthController;
+use App\Controllers\CommentController;
 use App\Controllers\PostController;
 
 session_start();
@@ -23,7 +24,6 @@ $router->get('/login',     [AuthController::class, 'showLoginForm']);
 $router->post('/login',    [AuthController::class, 'login']);
 $router->get('/logout',    [AuthController::class, 'logout']);
 
-// --- Posts (Paso 4) ---
 // --- Posts ---
 $router->get('/posts',         [PostController::class, 'index']);
 $router->get('/posts/show',    [PostController::class, 'show']);
@@ -32,6 +32,9 @@ $router->post('/posts/store',  [PostController::class, 'store']);
 $router->get('/posts/edit',    [PostController::class, 'edit']);
 $router->post('/posts/update', [PostController::class, 'update']);
 $router->post('/posts/delete', [PostController::class, 'destroy']);
+
+// --- Comentarios ---
+$router->post('/comments/store', [CommentController::class, 'store']);
 
 // Home = listado de posts
 $router->get('/', [PostController::class, 'index']);

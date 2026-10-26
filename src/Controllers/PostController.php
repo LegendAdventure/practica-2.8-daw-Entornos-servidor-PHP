@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Models\Post;
+use App\Core\Database;
 
 class PostController
 {
@@ -27,7 +28,7 @@ class PostController
         require __DIR__ . '/../Views/posts/index.php';
     }
 
-    // Detalle de un post
+    // Detalle de un post (con sus comentarios)
     public function show(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
@@ -41,9 +42,18 @@ class PostController
             return;
         }
 
+        // Comentarios del post, con el email del autor de cada uno
+        $comments = Database::fetchAll(
+            'SELECT comments.*, users.email AS author_email
+             FROM comments
+             INNER JOIN users ON users.id = comments.user_id
+             WHERE comments.post_id = :post_id
+             ORDER BY comments.created_at ASC',
+            ['post_id' => $id]
+        );
+
         require __DIR__ . '/../Views/posts/show.php';
     }
-
     // ---------------------------------------------------------------
     // Crear (solo logueados)
     // ---------------------------------------------------------------
