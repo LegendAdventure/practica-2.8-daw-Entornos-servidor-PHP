@@ -1,6 +1,39 @@
+# Desactiva la negociación de contenido de Apache.
+# Sin esto, Apache intentaría buscar variantes del archivo pedido
+# (por ejemplo, /posts.php, /posts.html) cuando no encuentra /posts,
+# lo que puede provocar comportamientos raros con las rutas limpias.
+
+
+
 Options -MultiViews
+
+# Activa el motor de reescritura de URLs (mod_rewrite).
+# Sin esta línea, las reglas RewriteRule de abajo se ignoran.
+
 RewriteEngine On
 
+# Condición 1: solo reescribe si el archivo pedido NO existe físicamente.
+# Ejemplo: /posts no existe como archivo → se reescribe.
+# Ejemplo: /index.php sí existe → no se reescribe (evita bucles).
+
+
+
 RewriteCond %{REQUEST_FILENAME} !-f
+
+# Condición 2: solo reescribe si el directorio pedido NO existe físicamente.
+# Ejemplo: /public/ existe como directorio → no se reescribe.
+# Ejemplo: /posts no existe como directorio → se reescribe.
+
+
+
 RewriteCond %{REQUEST_FILENAME} !-d
+
+# Regla de reescritura: cualquier URL que llegue hasta aquí se redirige
+# internamente a index.php (el front controller).
+#   ^      → cualquier path
+#   [QSA]  → Query String Append: conserva la query string original
+#            (ej: /posts?q=php → index.php?q=php, no se pierde ?q=php)
+#   [L]    → Last: si esta regla se aplica, no procesar más reglas
+
+
 RewriteRule ^ index.php [QSA,L]

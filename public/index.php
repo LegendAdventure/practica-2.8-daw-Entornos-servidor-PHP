@@ -11,8 +11,9 @@ use App\Controllers\PostController;
 
 session_start();
 
+// Comprobamos si existe el token
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); //Generamos el token
 }
 
 /**
