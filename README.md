@@ -35,3 +35,48 @@ publicar anuncios organizados por categoría y comentar los anuncios de otros.
 - **phpMyAdmin** para administrar la BD.
 
 ## Estructura del proyecto
+
+```text
+tablon-anuncios/
+├── composer.json               # Autoload PSR-4: "App\\": "src/"
+├── composer.lock               # Versiones exactas de las dependencias
+├── config.php                  # Lee .env y devuelve el array de configuración
+├── ConversacionIA.md           # Conversación con la IA (entregable)
+├── database.sql                # Esquema + datos de prueba
+├── docker-compose.yml          # Servicios web, db, phpmyadmin
+├── Dockerfile                  # Imagen PHP + Apache con mod_rewrite
+├── php/
+│   └── custom.ini              # Configuración PHP personalizada
+├── public/                     # DocumentRoot de Apache
+│   └── index.php               # Front controller + rutas + csrf_field()
+├── README.md                   # Documentación del proyecto
+├── Repositorio.txt             # Link al repositorio (entregable)
+├── src/
+│   ├── Controllers/
+│   │   ├── AuthController.php      # Registro, login, logout
+│   │   ├── CommentController.php   # Añadir comentarios
+│   │   └── PostController.php      # CRUD de anuncios + permisos
+│   ├── Core/
+│   │   ├── Database.php            # Singleton PDO + query/fetchAll/fetchOne
+│   │   └── Router.php              # Router con rutas limpias
+│   ├── Models/
+│   │   ├── BaseModel.php           # CRUD genérico (getAll, getById, insert…)
+│   │   ├── Comment.php             # Modelo Comment (hereda de BaseModel)
+│   │   ├── Post.php                # Modelo Post (JOINs + búsqueda)
+│   │   └── User.php                # Modelo User (findByEmail)
+│   └── Views/
+│       ├── auth/
+│       │   ├── login.php           # Formulario de login
+│       │   └── register.php        # Formulario de registro
+│       ├── errors/
+│       │   └── 403.php             # Vista de acceso prohibido
+│       ├── footer.php              # Pie común (cierra <main>, <body>, <html>)
+│       ├── layout.php              # Cabecera común (nav, flash, abre <main>)
+│       └── posts/
+│           ├── create.php          # Formulario de creación
+│           ├── edit.php            # Formulario de edición
+│           ├── index.php           # Listado + búsqueda
+│           └── show.php            # Detalle + comentarios
+├── TESTING.md                  # Plan de pruebas (48 casos)
+├── test.sh                     # Script de pruebas automáticas con curl
+└── vendor/                     # Dependencias de Composer (no se versiona)
